@@ -12,6 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Apy"
         tools:targetApi="31" >
+        <activity  android:name="com.yalantis.ucrop.UCropActivity">
+        </activity>
         <activity
             android:name=".ui.MainActivity"
             android:exported="true" >

@@ -69,4 +69,7 @@ dependencies {
     implementation("androidx.camera:camera-view:1.3.0")
 
 
+    // Lib Ucrop para ajustar imagem
+    implementation ("com.github.yalantis:ucrop:2.2.8")
+    implementation ("com.github.CanHub:Android-Image-Cropper:4.3.2")
 }
