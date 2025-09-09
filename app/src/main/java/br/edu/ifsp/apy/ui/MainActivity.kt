@@ -1,17 +1,22 @@
 package br.edu.ifsp.apy.ui
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity.RESULT_OK
+import br.edu.ifsp.apy.classification.ImageClassification
 import br.edu.ifsp.apy.databinding.ActivityMainBinding
 import com.yalantis.ucrop.UCrop
+import org.tensorflow.lite.task.vision.classifier.Classifications
 import java.text.NumberFormat
 
 class MainActivity : AppCompatActivity() {
@@ -22,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     private var currentImageUri: Uri? = null
 
-//    private lateinit var imageClassifierHelper: ImageClassifierHelper
+    private lateinit var imageClassification: ImageClassification
     
 //    private lateinit var classifier: SkinCancerClassifier
 
@@ -33,20 +38,18 @@ class MainActivity : AppCompatActivity() {
                     val bitmap: Bitmap = loadBitmapFromUri(uri)
                     binding.imageView.setImageBitmap(bitmap)
 
-//                    val resultIndex = classifier.classify(bitmap)
-//                    val resultText = when (resultIndex) {
-//                        0 -> "Lesão Benigna"
-//                        1 -> "Lesão Suspeita"
-//                        else -> "Erro ao classificar"
-//                    }
+
 
                     // Continuar com o UCrop
-                    UCrop.of(uri, Uri.fromFile(cacheDir.resolve("${System.currentTimeMillis()}.jpg")))
-                        .withAspectRatio(16f, 9f)
-                        .withMaxResultSize(2000, 2000)
-                        .start(this)
+//                    UCrop.of(uri, Uri.fromFile(cacheDir.resolve("${System.currentTimeMillis()}.jpg")))
+//                        .withAspectRatio(16f, 9f)
+//                        .withMaxResultSize(2000, 2000)
+//                        .start(this)
 
-                    binding.resultText.text = "" //resultText
+//                    val resultUri = UCrop.getOutput(Uri)
+                    currentImageUri= uri
+
+//                    binding.resultText.text = "" //resultText
 
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -76,22 +79,30 @@ class MainActivity : AppCompatActivity() {
 
     private fun analyzeImage(it: Uri) {
 
-//        imageClassifierHelper = ImageClassifierHelper(
-//            context = this,
-//            classifierListener = object : ImageClassifierHelper.ClassifierListener {
-//
-//                override fun onResults(results: List<Classifications>?) {
-//                    // TODO: Progress Indicator Hilang
-//                    runOnUiThread {
-//                        val resultText = results?.joinToString("\n") {
-//                            it.categories[0].label + ": " + NumberFormat.getPercentInstance()
-//                                .format(it.categories[0].score).trim()
-//                        }
-//                    }
-//                }
-//            }
-//        )
-//        imageClassifierHelper.classifyStaticImage(imageUri)
+        imageClassification = ImageClassification (
+            context = this,
+            classifierListener = object : ImageClassification.ClassifierListener {
+
+                    override fun onError(error: String) {
+                        runOnUiThread {
+//                            showToast(this@MainActivity, error)
+                            Toast.makeText(this@MainActivity, "Erro(99) na Classificação ", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onResults(results: List<Classifications>?) {
+                    runOnUiThread {
+                        val resultText = results?.joinToString("\n") {
+                            it.categories[0].label + ": " +
+                                    NumberFormat.getPercentInstance()
+                                .format(it.categories[0].score).trim()
+                        }
+                        binding.resultText.text = resultText
+                    }
+                }
+            }
+        )
+        imageClassification.classifyStationImage(it)
     }
 
     private fun loadBitmapFromUri(uri: Uri): Bitmap {
@@ -103,3 +114,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+

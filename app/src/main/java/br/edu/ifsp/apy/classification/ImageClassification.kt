@@ -6,9 +6,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.provider.MediaStore.Audio.Media
 import android.util.Log
-import androidx.camera.core.ImageProcessor
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.common.ops.CastOp
 import org.tensorflow.lite.support.image.TensorImage
@@ -25,7 +23,6 @@ class ImageClassification (
     private val modelName: String = "cancer_classification.tflite",
     val context: Context,
     val classifierListener: ClassifierListener?,
-
 ) {
     companion object {
         private const val TAG = "ImageClassification"
@@ -94,7 +91,5 @@ class ImageClassification (
 
             classifierListener?.onResults(results)
         }
-
     }
-
 }
