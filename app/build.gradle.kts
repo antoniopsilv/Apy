@@ -17,6 +17,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.6"   // ajuste para a versão do Compose usada
+    }
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -71,8 +80,27 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.3.0")
     implementation("androidx.camera:camera-view:1.3.0")
 
-
     // Lib Ucrop para ajustar imagem
     implementation ("com.github.yalantis:ucrop:2.2.8")
     implementation ("com.github.CanHub:Android-Image-Cropper:4.3.2")
+
+    // Compose BOM (recomendado para manter versões em sincronia)
+    implementation(platform("androidx.compose:compose-bom:2024.09.00")) // verifique a versão mais recente
+
+
+    // Módulos principais do Compose
+    implementation("androidx.activity:activity-compose")          // ComponentActivity, setContent
+    implementation("androidx.compose.ui:ui")                      // UI básica, Modifier etc.
+    implementation("androidx.compose.foundation:foundation")       // Layouts, background, shapes…
+    implementation("androidx.compose.material3:material3")         // Material 3 (Buttons, Text, Theme)
+//    implementation("androidx.compose.material3:material3:1.3.0") // ou mais recente
+    implementation("androidx.compose.material:material-icons-core")// Core de ícones
+    implementation("androidx.compose.material:material-icons-extended") // Icons.Default.Search, FolderOpen
+
+    // Opcional: Preview no Android Studio
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-tooling-preview")
+
+    // Tema padrão gerado pelo template
+    implementation("androidx.compose.runtime:runtime")             // @Composable, remember, etc.
 }
