@@ -2,10 +2,10 @@ package br.edu.ifsp.apy.ui
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -51,9 +52,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import br.edu.ifsp.apy.R
 import br.edu.ifsp.apy.classification.ImageClassification
 import org.tensorflow.lite.task.vision.classifier.Classifications
+import java.io.File
 import java.text.NumberFormat
 
 
@@ -64,8 +67,10 @@ fun AppScreen() {
     val context = LocalContext.current
     var currentImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var showResultCard by remember { mutableStateOf(false) }
     var resultText by remember { mutableStateOf("Resultado aparecerá aqui") }
 
+    // GALERIA
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -75,7 +80,30 @@ fun AppScreen() {
         }
     }
 
+    // CÂMERA
+    val cameraImageUri = remember { mutableStateOf<Uri?>(null) }
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            cameraImageUri.value?.let { uri ->
+                currentImageUri = uri
+                selectedBitmap = loadBitmapFromUri(context, uri)
+            }
+        }
+    }
 
+    fun createImageUri(context: Context): Uri {
+        val imageFile = File.createTempFile(
+            "photo_", ".jpg",
+            context.getExternalFilesDir("Pictures")
+        )
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            imageFile
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -89,7 +117,7 @@ fun AppScreen() {
 
                     IconButton(onClick = {
 
-                    } ) {
+                    }) {
                         Icon(
                             painter = painterResource(id = android.R.drawable.ic_menu_recent_history),
                             contentDescription = stringResource(id = R.string.salvar)
@@ -131,82 +159,109 @@ fun AppScreen() {
                             .height(300.dp)                  // altura igual ao Box
                             .clip(RoundedCornerShape(16.dp)) // arredondar cantos
                     )
-                    //Text("Imagem selecionada aparecerá aqui", color = Color.Gray)
                 }
             }
-
             Spacer(Modifier.height(24.dp))
-
-            // Botão Selecionar Imagem
-            Button(
-                onClick = { pickImageLauncher.launch("image/*") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(30.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
-            ) {
-                Icon(
-                    Icons.Filled.FolderOpen,
-                    contentDescription = "Selecionar Imagem",
-                    tint = Color.White
-                )
-                Text(
-                    text = "    Selecionar Imagem",
-                    color = Color.White
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // Botão Analisar Imagem
-            Button(
-                onClick = {
-                    currentImageUri?.let { uri ->
-                        val classifier = ImageClassification(
-                            context = context,
-                            classifierListener = object : ImageClassification.ClassifierListener {
-                                override fun onError(error: String) {
-                                    Toast.makeText(context, "Erro na classificação", Toast.LENGTH_SHORT).show()
+            if (!showResultCard) {
+                // Botão Selecionar Imagem
+                Button(
+                    onClick = { pickImageLauncher.launch("image/*") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(30.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
+                ) {
+                    Icon(
+                        Icons.Filled.FolderOpen,
+                        contentDescription = "Selecionar Imagem",
+                        tint = Color.White
+                    )
+                    Text(
+                        text = "    Selecionar Imagem",
+                        color = Color.White
+                    )
+                }
+                Spacer(Modifier.height(24.dp))
+                // Botão Tirar foto
+                Button(
+                    onClick = {
+                        val uri = createImageUri(context)
+                        cameraImageUri.value = uri
+                        takePictureLauncher.launch(uri)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(30.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
+                ) {
+                    Icon(
+                        Icons.Filled.PhotoCamera,
+                        contentDescription = "Tirar Foto",
+                        tint = Color.White
+                    )
+                    Text(
+                        text = "    Tirar Foto",
+                        color = Color.White
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                // Botão Analisar Imagem
+                Button(
+                    onClick = {
+                        currentImageUri?.let { uri ->
+                            val classifier = ImageClassification(
+                                context = context,
+                                classifierListener = object :
+                                    ImageClassification.ClassifierListener {
+                                    override fun onError(error: String) {
+                                        Toast.makeText(
+                                            context,
+                                            "Erro na classificação",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    override fun onResults(results: List<Classifications>?) {
+                                        val text = results?.joinToString("\n") {
+                                            it.categories[0].label + ": " +
+                                                    NumberFormat.getPercentInstance()
+                                                        .format(it.categories[0].score).trim()
+                                        } ?: "Sem resultado"
+                                        resultText = text;
+                                        // Exibe o card com o resultado
+                                        showResultCard = true
+                                    }
                                 }
-
-                                override fun onResults(results: List<Classifications>?) {
-                                    val text = results?.joinToString("\n") {
-                                        it.categories[0].label + ": " +
-                                                NumberFormat.getPercentInstance()
-                                                    .format(it.categories[0].score).trim()
-                                    } ?: "Sem resultado"
-                                    resultText = text;
-                                }
-                            }
-                        )
-                        classifier.classifyStationImage(uri)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(30.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
-            ) {
-                Icon(
-                    Icons.Filled.Search,
-                    contentDescription = "Analisar Imagem",
-                    tint = Color.White
+                            )
+                            classifier.classifyStationImage(uri)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(30.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
                 )
-                Text(
-                    text = "    Analisar Imagem",
-                    color = Color.White
-                )
+                {
+                    Icon(
+                        Icons.Filled.Search,
+                        contentDescription = "Analisar Imagem",
+                        tint = Color.White
+                    )
+                    Text(
+                        text = "    Analisar Imagem",
+                        color = Color.White
+                    )
+                }
             }
             Spacer(Modifier.height(32.dp))
-
-            // Resultado
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(6.dp)
-            ) {
-                Column(Modifier.padding(16.dp)) {
-                    Text("Resultado", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.height(8.dp))
-                    Text(resultText, fontSize = 16.sp, color = Color.Gray)
+            if (showResultCard) {
+                // Resultado
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(6.dp)
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text("Resultado", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(8.dp))
+                        Text(resultText, fontSize = 16.sp, color = Color.Gray)
+                    }
                 }
             }
         }
@@ -215,9 +270,30 @@ fun AppScreen() {
 }
 
 
-fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap {
+fun loadBitmapFromUri(context: Context, uri: Uri, maxSize: Int = 1024): Bitmap {
     return if (Build.VERSION.SDK_INT < 28) {
-        MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+
+        // MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+        val inputStream = context.contentResolver.openInputStream(uri)
+            ?: throw IllegalArgumentException("Não foi possível abrir o URI: $uri")
+
+        // Lê dimensões para redimensionar antes de carregar (economiza memória)
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeStream(inputStream, null, options)
+        inputStream.close()
+
+        // Calcula fator de escala para não estourar memória
+        var scale = 1
+        while (options.outWidth / scale > maxSize || options.outHeight / scale > maxSize) {
+            scale *= 2
+        }
+
+        // Decodifica a imagem com redução proporcional
+        val decodeOptions = BitmapFactory.Options().apply { inSampleSize = scale }
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            BitmapFactory.decodeStream(input, null, decodeOptions)
+                ?: throw IllegalArgumentException("Falha ao decodificar bitmap de $uri")
+        } ?: throw IllegalArgumentException("Não foi possível reabrir o URI: $uri")
     } else {
         val source = ImageDecoder.createSource(context.contentResolver, uri)
         ImageDecoder.decodeBitmap(source)

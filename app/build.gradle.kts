@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -22,7 +23,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.6"   // ajuste para a versão do Compose usada
+        kotlinCompilerExtensionVersion = "1.6.11"   // ajuste para a versão do Compose usada
     }
 
 
@@ -58,6 +59,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.room.common.jvm)
 
     // Testes
     testImplementation(libs.junit)
@@ -103,4 +105,11 @@ dependencies {
 
     // Tema padrão gerado pelo template
     implementation("androidx.compose.runtime:runtime")             // @Composable, remember, etc.
+
+    // Room
+    implementation ("androidx.room:room-runtime:2.6.0")
+    implementation ("androidx.room:room-ktx:2.6.0")
+
 }
+
+
