@@ -138,7 +138,7 @@ fun AppScreen() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(250.dp)
                     .background(Color(0xFFEDE7F6), RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
@@ -156,7 +156,7 @@ fun AppScreen() {
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(300.dp)                  // altura igual ao Box
+                            .height(250.dp)                  // altura igual ao Box
                             .clip(RoundedCornerShape(16.dp)) // arredondar cantos
                     )
                 }
