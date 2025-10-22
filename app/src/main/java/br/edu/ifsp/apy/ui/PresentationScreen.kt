@@ -1,5 +1,11 @@
 package br.edu.ifsp.apy.ui
 
+import android.app.Application
+import br.edu.ifsp.apy.classification.ImageClassification
+import br.edu.ifsp.apy.model.entity.History
+import br.edu.ifsp.apy.view.HistoryViewModel
+import br.edu.ifsp.apy.common.ButtonCustom
+import br.edu.ifsp.apy.common.IconCustom
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -20,7 +26,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.DoorBack
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -43,7 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -53,8 +61,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import br.edu.ifsp.apy.R
-import br.edu.ifsp.apy.classification.ImageClassification
+import br.edu.ifsp.apy.common.loadBitmapFromUri
+import br.edu.ifsp.apy.common.setDateFromMillis
+import br.edu.ifsp.apy.view.ViewModelFactory
 import org.tensorflow.lite.task.vision.classifier.Classifications
 import java.io.File
 import java.text.NumberFormat
@@ -62,13 +74,18 @@ import java.text.NumberFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppScreen() {
+fun PresentationScreen(navController: NavController) {
 
-    val context = LocalContext.current
     var currentImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var showResultCard by remember { mutableStateOf(false) }
     var resultText by remember { mutableStateOf("Resultado aparecerá aqui") }
+
+    val context = LocalContext.current
+    val application = context.applicationContext as Application
+    val historyViewModel: HistoryViewModel = viewModel(
+        factory = ViewModelFactory.getInstance(application)
+    )
 
     // GALERIA
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -116,7 +133,8 @@ fun AppScreen() {
                 actions = {
 
                     IconButton(onClick = {
-
+                        // Chama a HistoryScreen ao clicar no ícone
+                        navController.navigate("history_screen")
                     }) {
                         Icon(
                             painter = painterResource(id = android.R.drawable.ic_menu_recent_history),
@@ -138,7 +156,7 @@ fun AppScreen() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)
+                    .height(200.dp)
                     .background(Color(0xFFEDE7F6), RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
@@ -151,12 +169,12 @@ fun AppScreen() {
                     )
                 } else {
                     Image(
-                        painter = painterResource(id = R.mipmap.ic_apy), // use seu drawable/mipmap
+                        painter = painterResource(id = R.mipmap.ic_apy_v2), // use seu drawable/mipmap
                         contentDescription = "Imagem inicial",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp)                  // altura igual ao Box
+                            .height(200.dp)                  // altura igual ao Box
                             .clip(RoundedCornerShape(16.dp)) // arredondar cantos
                     )
                 }
@@ -170,17 +188,12 @@ fun AppScreen() {
                     shape = RoundedCornerShape(30.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
                 ) {
-                    Icon(
-                        Icons.Filled.FolderOpen,
-                        contentDescription = "Selecionar Imagem",
-                        tint = Color.White
-                    )
-                    Text(
-                        text = "    Selecionar Imagem",
-                        color = Color.White
+                    IconCustom (
+                        icon = Icons.Filled.FolderOpen,
+                        text = "Selecionar Imagem",
                     )
                 }
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(16.dp))
                 // Botão Tirar foto
                 Button(
                     onClick = {
@@ -192,14 +205,9 @@ fun AppScreen() {
                     shape = RoundedCornerShape(30.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
                 ) {
-                    Icon(
-                        Icons.Filled.PhotoCamera,
-                        contentDescription = "Tirar Foto",
-                        tint = Color.White
-                    )
-                    Text(
-                        text = "    Tirar Foto",
-                        color = Color.White
+                    IconCustom (
+                        icon = Icons.Filled.PhotoCamera,
+                        text = "Tirar Foto",
                     )
                 }
                 Spacer(Modifier.height(16.dp))
@@ -225,6 +233,13 @@ fun AppScreen() {
                                                         .format(it.categories[0].score).trim()
                                         } ?: "Sem resultado"
                                         resultText = text;
+
+                                        val history = History(result = resultText ?: "",
+                                            imageUri = uri.toString(),
+                                            date = setDateFromMillis(System.currentTimeMillis()))
+
+                                        historyViewModel?.insertHistory(history)
+
                                         // Exibe o card com o resultado
                                         showResultCard = true
                                     }
@@ -238,18 +253,13 @@ fun AppScreen() {
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
                 )
                 {
-                    Icon(
-                        Icons.Filled.Search,
-                        contentDescription = "Analisar Imagem",
-                        tint = Color.White
-                    )
-                    Text(
-                        text = "    Analisar Imagem",
-                        color = Color.White
+                    IconCustom (
+                        icon = Icons.Filled.Search,
+                        text = "Analisar Imagem",
                     )
                 }
             }
-            Spacer(Modifier.height(32.dp))
+
             if (showResultCard) {
                 // Resultado
                 Card(
@@ -257,46 +267,37 @@ fun AppScreen() {
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(6.dp)
                 ) {
-                    Column(Modifier.padding(16.dp)) {
-                        Text("Resultado", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
+                    Column(Modifier.padding(6.dp)) {
+                        Text("Possível diagnóstico", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(4.dp))
                         Text(resultText, fontSize = 16.sp, color = Color.Gray)
                     }
                 }
+
+                Spacer(Modifier.height(8.dp))
+
+                ButtonCustom(
+                    text = "Retornar",
+                    icon = Icons.Filled.DoorBack,
+                    onClick = { showResultCard = false }
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                ButtonCustom(
+                    text = "Saiba Mais",
+                    icon = Icons.Filled.Book,
+                    onClick = { showResultCard = false }
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                ButtonCustom(
+                    text = "Localizar Centro Médico",
+                    icon = Icons.Filled.HealthAndSafety,
+                    onClick = { showResultCard = false }
+                )
             }
         }
     }
-
 }
-
-
-fun loadBitmapFromUri(context: Context, uri: Uri, maxSize: Int = 1024): Bitmap {
-    return if (Build.VERSION.SDK_INT < 28) {
-
-        // MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-        val inputStream = context.contentResolver.openInputStream(uri)
-            ?: throw IllegalArgumentException("Não foi possível abrir o URI: $uri")
-
-        // Lê dimensões para redimensionar antes de carregar (economiza memória)
-        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        BitmapFactory.decodeStream(inputStream, null, options)
-        inputStream.close()
-
-        // Calcula fator de escala para não estourar memória
-        var scale = 1
-        while (options.outWidth / scale > maxSize || options.outHeight / scale > maxSize) {
-            scale *= 2
-        }
-
-        // Decodifica a imagem com redução proporcional
-        val decodeOptions = BitmapFactory.Options().apply { inSampleSize = scale }
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            BitmapFactory.decodeStream(input, null, decodeOptions)
-                ?: throw IllegalArgumentException("Falha ao decodificar bitmap de $uri")
-        } ?: throw IllegalArgumentException("Não foi possível reabrir o URI: $uri")
-    } else {
-        val source = ImageDecoder.createSource(context.contentResolver, uri)
-        ImageDecoder.decodeBitmap(source)
-    }
-}
-

@@ -1,14 +1,13 @@
 package br.edu.ifsp.apy.model.database
 
 import android.content.Context
-/*import androidx.room.Database
+import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import br.edu.ifsp.apy.model.dao.HistoryDAO*/
+import br.edu.ifsp.apy.model.dao.HistoryDAO
 import br.edu.ifsp.apy.model.entity.History
 
 
-/*
 @Database(entities = [History::class], version = 1)
 abstract class HistoryDatabase: RoomDatabase() {
     abstract fun historyDao(): HistoryDAO
@@ -31,4 +30,4 @@ abstract class HistoryDatabase: RoomDatabase() {
             return INSTANCE as HistoryDatabase
         }
     }
-}*/
+}
