@@ -79,9 +79,12 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // TensorFlow Lite
-    implementation("org.tensorflow:tensorflow-lite:2.13.0")
-    implementation("org.tensorflow:tensorflow-lite-support:0.3.1")
-    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
+/*    implementation("org.tensorflow:tensorflow-lite:2.13.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.3.1")*/
+    //implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
+    implementation("org.tensorflow:tensorflow-lite:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+
 
     // Caso use o CameraX (opcional)
     implementation("androidx.camera:camera-core:1.3.0")

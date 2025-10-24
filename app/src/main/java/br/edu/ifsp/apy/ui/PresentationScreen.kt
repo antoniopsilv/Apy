@@ -67,7 +67,6 @@ import br.edu.ifsp.apy.R
 import br.edu.ifsp.apy.common.loadBitmapFromUri
 import br.edu.ifsp.apy.common.setDateFromMillis
 import br.edu.ifsp.apy.view.ViewModelFactory
-import org.tensorflow.lite.task.vision.classifier.Classifications
 import java.io.File
 import java.text.NumberFormat
 
@@ -226,13 +225,20 @@ fun PresentationScreen(navController: NavController) {
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
-                                    override fun onResults(results: List<Classifications>?) {
+/*                                    override fun onResults(results: List<Classifications>?) {
                                         val text = results?.joinToString("\n") {
                                             it.categories[0].label + ": " +
                                                     NumberFormat.getPercentInstance()
                                                         .format(it.categories[0].score).trim()
                                         } ?: "Sem resultado"
-                                        resultText = text;
+                                        resultText = text;*/
+
+                                    override fun onResults(results: List<Pair<String, Float>>?) {
+                                        val text = results?.joinToString("\n") { (label, score) ->
+                                            "$label: " + NumberFormat.getPercentInstance().format(score).trim()
+                                        } ?: "Sem resultado"
+
+                                        resultText = text
 
                                         val history = History(result = resultText ?: "",
                                             imageUri = uri.toString(),
