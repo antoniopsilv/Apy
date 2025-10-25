@@ -8,10 +8,7 @@ import br.edu.ifsp.apy.common.ButtonCustom
 import br.edu.ifsp.apy.common.IconCustom
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,7 +70,7 @@ import java.text.NumberFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PresentationScreen(navController: NavController) {
+fun HomeScreen(navController: NavController) {
 
     var currentImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }

@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
                     startDestination = "presentation_screen"
                 ) {
                     composable("presentation_screen") {
-                        PresentationScreen(navController)
+                        HomeScreen(navController)
                     }
                     composable("history_screen") {
                         HistoryScreen()
