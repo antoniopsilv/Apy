@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Apy</string>
     <string name="salvar">save</string>
+    <string name="google_maps_key">AIzaSyDctECjWTfzWiaauPLMA_5zJ7rqq55_ZWs</string>
 </resources>
