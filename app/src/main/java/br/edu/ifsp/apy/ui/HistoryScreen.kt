@@ -83,7 +83,6 @@ fun HistoryItem(history: History) {
                         Intent.FLAG_GRANT_READ_URI_PERMISSION
                     )
                 } catch (e: SecurityException) {
-                    // URI não permite permissão persistente — ignora ou trata aqui
                 }
             }
 

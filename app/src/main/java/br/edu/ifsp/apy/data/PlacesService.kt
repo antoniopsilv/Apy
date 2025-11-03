@@ -9,8 +9,9 @@ interface PlacesService {
     suspend fun buscarDermatologistas(
         @Query("location") location: String,
         @Query("radius") radius: Int,
-        @Query("type") type: String = "doctor",
-        @Query("keyword") keyword: String = "dermatologist",
+        @Query("type") type: String = "health",
+        @Query("keyword") keyword: String = "dermatologista",
+        @Query("language") language: String = "pt-BR",
         @Query("key") apiKey: String
     ): Response<PlacesResponse>
 }
