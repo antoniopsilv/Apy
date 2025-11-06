@@ -76,6 +76,8 @@ import androidx.compose.runtime.collectAsState
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -84,6 +86,9 @@ import br.edu.ifsp.apy.BuildConfig
 import br.edu.ifsp.apy.common.getCurrentLocation
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -278,103 +283,80 @@ fun HomeScreen(navController: NavController) {
                 }
 
                 Spacer(Modifier.height(16.dp))
+
                 Button(
                     onClick = {
                         homeViewModel.setLoading(true)
-                        //AnalyzeButton(isLoading)
-                            currentImageUri?.let { uri ->
-                            val classifier = ImageClassification(
-                                context = context,
-                                classifierListener = object :
-                                    ImageClassification.ClassifierListener {
-                                    override fun onError(error: String) {
-                                        Toast.makeText(
-                                            context,
-                                            "Erro na classificação",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+
+                        currentImageUri?.let { uri ->
+                            coroutineScope.launch(Dispatchers.IO) {
+                                val classifier = ImageClassification(
+                                    context = context,
+                                    classifierListener = object :
+                                        ImageClassification.ClassifierListener {
+
+                                        override fun onError(error: String) {
+                                            Handler(Looper.getMainLooper()).post {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Erro na classificação",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                homeViewModel.setLoading(false)
+                                            }
+                                        }
+
+                                        override fun onResults(results: List<Pair<String, Float>>?) {
+                                            val text =
+                                                results?.joinToString("\n") { (label, score) ->
+                                                    "$label: ${
+                                                        NumberFormat.getPercentInstance()
+                                                            .format(score).trim()
+                                                    }"
+                                                } ?: "Sem resultado"
+
+                                            Handler(Looper.getMainLooper()).post {
+                                                homeViewModel.setLoading(false)
+                                                resultText = text
+                                                showResultCard = true
+
+                                                val history = History(
+                                                    result = resultText,
+                                                    imageUri = uri.toString(),
+                                                    date = setDateFromMillis(System.currentTimeMillis())
+                                                )
+                                                historyViewModel.insertHistory(history)
+                                            }
+                                        }
                                     }
-
-                                    override fun onResults(results: List<Pair<String, Float>>?) {
-                                        val text = results?.joinToString("\n") { (label, score) ->
-                                            "$label: ${
-                                                NumberFormat.getPercentInstance().format(score)
-                                                    .trim()
-                                            }"
-                                        } ?: "Sem resultado"
-
-                                        homeViewModel.setLoading(false)
-                                        resultText = text
-
-                                        val history = History(
-                                            result = resultText,
-                                            imageUri = uri.toString(),
-                                            date = setDateFromMillis(System.currentTimeMillis())
-                                        )
-
-                                        historyViewModel.insertHistory(history)
-                                        showResultCard = true
-                                    }
-                                }
-                            )
-                            classifier.classifyStationImage(uri)
+                                )
+                                classifier.classifyStationImage(uri)
+                            }
+                        } ?: run {
+                            Toast.makeText(
+                                context,
+                                "Nenhuma imagem selecionada",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            homeViewModel.setLoading(false)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(30.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7)),
+                    enabled = !isLoading
                 ) {
-                    IconCustom(icon = Icons.Filled.Search, text = "Analisar Imagem")
-                }
-            }
-
-
-            /*
-            AnalyzeButton(
-                isLoading = isLoading,
-                onClick = {
-                    homeViewModel.setLoading(true)
-                    currentImageUri?.let { uri ->
-                        val classifier = ImageClassification(
-                            context = context,
-                            classifierListener = object :
-                                ImageClassification.ClassifierListener {
-                                override fun onError(error: String) {
-                                    Toast.makeText(
-                                        context,
-                                        "Erro na classificação",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    homeViewModel.setLoading(false)
-                                }
-
-                                override fun onResults(results: List<Pair<String, Float>>?) {
-                                    val text = results?.joinToString("\n") { (label, score) ->
-                                        "$label: ${
-                                            NumberFormat.getPercentInstance().format(score)
-                                                .trim()
-                                        }"
-                                    } ?: "Sem resultado"
-
-                                    homeViewModel.setLoading(false)
-                                    resultText = text
-
-                                    val history = History(
-                                        result = resultText,
-                                        imageUri = uri.toString(),
-                                        date = setDateFromMillis(System.currentTimeMillis())
-                                    )
-
-                                    historyViewModel.insertHistory(history)
-                                    showResultCard = true
-                                }
-                            }
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
                         )
-                        classifier.classifyStationImage(uri)
+                    } else {
+                        IconCustom(icon = Icons.Filled.Search, text = "Analisar Imagem")
                     }
                 }
-            )
-            */
+            }
 // Resultado
             if (showResultCard) {
 
