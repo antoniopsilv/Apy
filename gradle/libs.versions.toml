@@ -20,6 +20,7 @@ media3CommonKtx = "1.8.0"
 runtimeLivedataVersion = "1.9.3"
 foundationLayoutAndroid = "1.7.2"
 benchmarkTraceprocessorAndroid = "1.4.1"
+foundationAndroid = "1.7.2"
 
 [libraries]
 
@@ -41,6 +42,7 @@ androidx-media3-common-ktx = { group = "androidx.media3", name = "media3-common-
 runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedataVersion" }
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 androidx-benchmark-traceprocessor-android = { group = "androidx.benchmark", name = "benchmark-traceprocessor-android", version.ref = "benchmarkTraceprocessorAndroid" }
+androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

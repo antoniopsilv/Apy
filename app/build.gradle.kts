@@ -77,6 +77,10 @@ dependencies {
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.androidx.benchmark.traceprocessor.android)
+    implementation(libs.androidx.foundation.android)
+    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.foundation.layout.android)
 
     // Testes
     testImplementation(libs.junit)

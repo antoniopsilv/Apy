@@ -1,11 +1,17 @@
+@file:Suppress("OPT_IN_IS_NOT_ENABLED")
+
 package br.edu.ifsp.apy.ui
 
-import android.app.Application
 import br.edu.ifsp.apy.classification.ImageClassification
 import br.edu.ifsp.apy.model.entity.History
 import br.edu.ifsp.apy.view.HistoryViewModel
 import br.edu.ifsp.apy.common.ButtonCustom
 import br.edu.ifsp.apy.common.IconCustom
+import br.edu.ifsp.apy.common.loadBitmapFromUri
+import br.edu.ifsp.apy.common.setDateFromMillis
+import br.edu.ifsp.apy.view.ViewModelFactory
+import br.edu.ifsp.apy.R
+import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -21,6 +27,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -28,15 +36,16 @@ import androidx.compose.material.icons.filled.DoorBack
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -60,28 +69,89 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import br.edu.ifsp.apy.R
-import br.edu.ifsp.apy.common.loadBitmapFromUri
-import br.edu.ifsp.apy.common.setDateFromMillis
-import br.edu.ifsp.apy.view.ViewModelFactory
+import br.edu.ifsp.apy.view.HomeViewModel
+import br.edu.ifsp.apy.view.HomeViewModelFactory
 import java.io.File
+import androidx.compose.runtime.collectAsState
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.core.content.ContextCompat
+import br.edu.ifsp.apy.BuildConfig
+import br.edu.ifsp.apy.common.getCurrentLocation
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
+
+    val context = LocalContext.current
+    val apiKey = BuildConfig.GOOGLE_MAPS_API_KEY
+
+    // ViewModels
+    val homeViewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(context.applicationContext as Application)
+    )
+    val historyViewModel: HistoryViewModel = viewModel(
+        factory = ViewModelFactory.getInstance(context.applicationContext as Application)
+    )
+
+    val places by homeViewModel.places.collectAsState()
+    val isLoading by homeViewModel.isLoading.collectAsState()
+    val error by homeViewModel.error.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+
 
     var currentImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var showResultCard by remember { mutableStateOf(false) }
     var resultText by remember { mutableStateOf("Resultado aparecerá aqui") }
 
-    val context = LocalContext.current
-    val application = context.applicationContext as Application
-    val historyViewModel: HistoryViewModel = viewModel(
-        factory = ViewModelFactory.getInstance(application)
-    )
+
+    // Define quais permissões são necessárias
+    val locationPermissions = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.NEARBY_WIFI_DEVICES
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        }
+    }
+
+    val multiplePermissionsLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val allGranted = permissions.values.all { it }
+            if (allGranted) {
+                // Obter a localização do usuário e chamar a função do ViewModel
+                coroutineScope.launch {
+                    val latLng = getCurrentLocation(context)
+                    homeViewModel.fetchNearbyDermatologists(
+                        apiKey = apiKey,
+                        latitude = latLng.latitude,
+                        longitude = latLng.longitude
+                    )
+                }
+            } else {
+                Toast.makeText(
+                    context,
+                    "Permissões de localização não concedidas",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+
+    val currentLauncher = rememberUpdatedState(multiplePermissionsLauncher)
 
     // GALERIA
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -91,6 +161,7 @@ fun HomeScreen(navController: NavController) {
             currentImageUri = it
             selectedBitmap = loadBitmapFromUri(context, it)
         }
+        // homeViewModel.setLoading(false)
     }
 
     // CÂMERA
@@ -104,6 +175,7 @@ fun HomeScreen(navController: NavController) {
                 selectedBitmap = loadBitmapFromUri(context, uri)
             }
         }
+        // homeViewModel.setLoading(false)
     }
 
     fun createImageUri(context: Context): Uri {
@@ -127,11 +199,7 @@ fun HomeScreen(navController: NavController) {
                     titleContentColor = Color.White
                 ),
                 actions = {
-
-                    IconButton(onClick = {
-                        // Chama a HistoryScreen ao clicar no ícone
-                        navController.navigate("history_screen")
-                    }) {
+                    IconButton(onClick = { navController.navigate("history_screen") }) {
                         Icon(
                             painter = painterResource(id = android.R.drawable.ic_menu_recent_history),
                             contentDescription = stringResource(id = R.string.salvar)
@@ -141,6 +209,7 @@ fun HomeScreen(navController: NavController) {
             )
         }
     ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -148,7 +217,8 @@ fun HomeScreen(navController: NavController) {
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Exibe imagem
+
+            // Exibe imagem ou placeholder
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -165,32 +235,35 @@ fun HomeScreen(navController: NavController) {
                     )
                 } else {
                     Image(
-                        painter = painterResource(id = R.mipmap.ic_apy_v2), // use seu drawable/mipmap
+                        painter = painterResource(id = R.mipmap.ic_apy_v2),
                         contentDescription = "Imagem inicial",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp)                  // altura igual ao Box
-                            .clip(RoundedCornerShape(16.dp)) // arredondar cantos
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(16.dp))
                     )
                 }
             }
+
             Spacer(Modifier.height(24.dp))
+
             if (!showResultCard) {
-                // Botão Selecionar Imagem
+                // Botões principais
                 Button(
-                    onClick = { pickImageLauncher.launch("image/*") },
+                    onClick = {
+                        //homeViewModel.setLoading(true)
+                        pickImageLauncher.launch("image/*")
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(30.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
                 ) {
-                    IconCustom (
-                        icon = Icons.Filled.FolderOpen,
-                        text = "Selecionar Imagem",
-                    )
+                    IconCustom(icon = Icons.Filled.FolderOpen, text = "Selecionar Imagem")
                 }
+
                 Spacer(Modifier.height(16.dp))
-                // Botão Tirar foto
+
                 Button(
                     onClick = {
                         val uri = createImageUri(context)
@@ -201,16 +274,15 @@ fun HomeScreen(navController: NavController) {
                     shape = RoundedCornerShape(30.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
                 ) {
-                    IconCustom (
-                        icon = Icons.Filled.PhotoCamera,
-                        text = "Tirar Foto",
-                    )
+                    IconCustom(icon = Icons.Filled.PhotoCamera, text = "Tirar Foto")
                 }
+
                 Spacer(Modifier.height(16.dp))
-                // Botão Analisar Imagem
                 Button(
                     onClick = {
-                        currentImageUri?.let { uri ->
+                        homeViewModel.setLoading(true)
+                        //AnalyzeButton(isLoading)
+                            currentImageUri?.let { uri ->
                             val classifier = ImageClassification(
                                 context = context,
                                 classifierListener = object :
@@ -222,28 +294,25 @@ fun HomeScreen(navController: NavController) {
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
-/*                                    override fun onResults(results: List<Classifications>?) {
-                                        val text = results?.joinToString("\n") {
-                                            it.categories[0].label + ": " +
-                                                    NumberFormat.getPercentInstance()
-                                                        .format(it.categories[0].score).trim()
-                                        } ?: "Sem resultado"
-                                        resultText = text;*/
 
                                     override fun onResults(results: List<Pair<String, Float>>?) {
                                         val text = results?.joinToString("\n") { (label, score) ->
-                                            "$label: " + NumberFormat.getPercentInstance().format(score).trim()
+                                            "$label: ${
+                                                NumberFormat.getPercentInstance().format(score)
+                                                    .trim()
+                                            }"
                                         } ?: "Sem resultado"
 
+                                        homeViewModel.setLoading(false)
                                         resultText = text
 
-                                        val history = History(result = resultText ?: "",
+                                        val history = History(
+                                            result = resultText,
                                             imageUri = uri.toString(),
-                                            date = setDateFromMillis(System.currentTimeMillis()))
+                                            date = setDateFromMillis(System.currentTimeMillis())
+                                        )
 
-                                        historyViewModel?.insertHistory(history)
-
-                                        // Exibe o card com o resultado
+                                        historyViewModel.insertHistory(history)
                                         showResultCard = true
                                     }
                                 }
@@ -254,53 +323,169 @@ fun HomeScreen(navController: NavController) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(30.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
-                )
-                {
-                    IconCustom (
-                        icon = Icons.Filled.Search,
-                        text = "Analisar Imagem",
-                    )
+                ) {
+                    IconCustom(icon = Icons.Filled.Search, text = "Analisar Imagem")
                 }
             }
 
-            if (showResultCard) {
-                // Resultado
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(6.dp)
-                ) {
-                    Column(Modifier.padding(6.dp)) {
-                        Text("Possível diagnóstico", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(4.dp))
-                        Text(resultText, fontSize = 16.sp, color = Color.Gray)
+
+            /*
+            AnalyzeButton(
+                isLoading = isLoading,
+                onClick = {
+                    homeViewModel.setLoading(true)
+                    currentImageUri?.let { uri ->
+                        val classifier = ImageClassification(
+                            context = context,
+                            classifierListener = object :
+                                ImageClassification.ClassifierListener {
+                                override fun onError(error: String) {
+                                    Toast.makeText(
+                                        context,
+                                        "Erro na classificação",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    homeViewModel.setLoading(false)
+                                }
+
+                                override fun onResults(results: List<Pair<String, Float>>?) {
+                                    val text = results?.joinToString("\n") { (label, score) ->
+                                        "$label: ${
+                                            NumberFormat.getPercentInstance().format(score)
+                                                .trim()
+                                        }"
+                                    } ?: "Sem resultado"
+
+                                    homeViewModel.setLoading(false)
+                                    resultText = text
+
+                                    val history = History(
+                                        result = resultText,
+                                        imageUri = uri.toString(),
+                                        date = setDateFromMillis(System.currentTimeMillis())
+                                    )
+
+                                    historyViewModel.insertHistory(history)
+                                    showResultCard = true
+                                }
+                            }
+                        )
+                        classifier.classifyStationImage(uri)
                     }
                 }
+            )
+            */
+// Resultado
+            if (showResultCard) {
 
-                Spacer(Modifier.height(8.dp))
+                if (places.isEmpty()) {
 
-                ButtonCustom(
-                    text = "Retornar",
-                    icon = Icons.Filled.DoorBack,
-                    onClick = { showResultCard = false }
-                )
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(6.dp)
+                    ) {
+                        Column(Modifier.padding(12.dp)) {
+                            Text(
+                                "Possível diagnóstico",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(resultText, fontSize = 16.sp, color = Color.Gray)
+                        }
+                    }
 
-                Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(12.dp))
 
-                ButtonCustom(
-                    text = "Saiba Mais",
-                    icon = Icons.Filled.Book,
-                    onClick = { showResultCard = false }
-                )
+                    ButtonCustom(
+                        text = "Retornar",
+                        icon = Icons.Filled.DoorBack,
+                        onClick = { showResultCard = false }
+                    )
 
-                Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(6.dp))
 
-                ButtonCustom(
-                    text = "Localizar Centro Médico",
-                    icon = Icons.Filled.HealthAndSafety,
-                    onClick = { showResultCard = false }
-                )
+
+                    ButtonCustom(
+                        text = "Saiba Mais",
+                        icon = Icons.Filled.Book,
+                        onClick = {
+                            showResultCard = false
+                            seeMore(context, resultText)
+                        }
+                    )
+
+                    Spacer(Modifier.height(6.dp))
+
+                    // Botão "Localizar Centro Médico"
+                    ButtonCustom(
+                        text = "Localizar Centro Médico",
+                        icon = Icons.Filled.HealthAndSafety,
+                        onClick = {
+                            val allGranted = locationPermissions.all {
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    it
+                                ) == PackageManager.PERMISSION_GRANTED
+                            }
+
+                            if (!allGranted) {
+                                currentLauncher.value.launch(locationPermissions)
+                            } else {
+                                //    homeViewModel.fetchNearbyDermatologists(apiKey)
+                                coroutineScope.launch {
+                                    val latLng = getCurrentLocation(context)
+                                    homeViewModel.fetchNearbyDermatologists(
+                                        apiKey = apiKey,
+                                        latitude = latLng.latitude,
+                                        longitude = latLng.longitude
+                                    )
+                                }
+
+                            }
+                        }
+                    )
+                }
+                when {
+                    isLoading -> CircularProgressIndicator()
+                    error != null -> Text(
+                        error ?: "",
+                        color = MaterialTheme.colorScheme.error
+                    )
+
+                    places.isNotEmpty() -> {
+                        ButtonCustom(
+                            text = "Retornar",
+                            icon = Icons.Filled.DoorBack,
+                            onClick = {
+                                homeViewModel.clearPlaces()
+                                showResultCard = false
+                            }
+                        )
+
+                        Spacer(Modifier.height(20.dp))
+
+                        LazyColumn {
+                            items(places) { place ->
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    elevation = CardDefaults.cardElevation(4.dp)
+                                ) {
+                                    Text(
+                                        text = place,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
+
+
