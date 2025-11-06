@@ -1,117 +1,43 @@
 package br.edu.ifsp.apy.ui
-
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Log
-import android.view.View
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatActivity.RESULT_OK
-import br.edu.ifsp.apy.classification.ImageClassification
-import br.edu.ifsp.apy.databinding.ActivityMainBinding
-import com.yalantis.ucrop.UCrop
-import org.tensorflow.lite.task.vision.classifier.Classifications
-import java.text.NumberFormat
-
-class MainActivity : AppCompatActivity() {
-
-    private val binding: ActivityMainBinding by lazy {
-        ActivityMainBinding.inflate(layoutInflater)
-    }
-
-    private var currentImageUri: Uri? = null
-
-    private lateinit var imageClassification: ImageClassification
-    
-//    private lateinit var classifier: SkinCancerClassifier
-
-    private val getImageFromGallery =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            if (uri != null) {
-                try {
-                    val bitmap: Bitmap = loadBitmapFromUri(uri)
-                    binding.imageView.setImageBitmap(bitmap)
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import br.edu.ifsp.apy.R
+import com.google.android.libraries.places.api.Places
 
 
-
-                    // Continuar com o UCrop
-//                    UCrop.of(uri, Uri.fromFile(cacheDir.resolve("${System.currentTimeMillis()}.jpg")))
-//                        .withAspectRatio(16f, 9f)
-//                        .withMaxResultSize(2000, 2000)
-//                        .start(this)
-
-//                    val resultUri = UCrop.getOutput(Uri)
-                    currentImageUri= uri
-
-//                    binding.resultText.text = "" //resultText
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Toast.makeText(this, "Erro ao processar imagem", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                Toast.makeText(this, "Nenhuma imagem selecionada", Toast.LENGTH_SHORT).show()
-            }
-        }
+class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding.root)
 
-//        classifier = SkinCancerClassifier(this)
-
-        binding.buttonSelectImage.setOnClickListener {
-            getImageFromGallery.launch("image/*")
+        // Inicializa o Places API aqui
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, getString(R.string.google_maps_key))
         }
 
-        binding.buttonAnalyzeImage.setOnClickListener {
-            currentImageUri?.let {
-                analyzeImage(it)
-            }
-        }
-    }
+        setContent {
+            MaterialTheme {
+                val navController = rememberNavController()
 
-    private fun analyzeImage(it: Uri) {
-
-        imageClassification = ImageClassification (
-            context = this,
-            classifierListener = object : ImageClassification.ClassifierListener {
-
-                    override fun onError(error: String) {
-                        runOnUiThread {
-//                            showToast(this@MainActivity, error)
-                            Toast.makeText(this@MainActivity, "Erro(99) na Classificação ", Toast.LENGTH_SHORT).show()
-                        }
+                NavHost(
+                    navController = navController,
+                    startDestination = "presentation_screen"
+                ) {
+                    composable("presentation_screen") {
+                        HomeScreen(navController)
                     }
-
-                    override fun onResults(results: List<Classifications>?) {
-                    runOnUiThread {
-                        val resultText = results?.joinToString("\n") {
-                            it.categories[0].label + ": " +
-                                    NumberFormat.getPercentInstance()
-                                .format(it.categories[0].score).trim()
-                        }
-                        binding.resultText.text = resultText
+                    composable("history_screen") {
+                        HistoryScreen()
                     }
                 }
             }
-        )
-        imageClassification.classifyStationImage(it)
-    }
-
-    private fun loadBitmapFromUri(uri: Uri): Bitmap {
-        return if (Build.VERSION.SDK_INT < 28) {
-            MediaStore.Images.Media.getBitmap(contentResolver, uri)
-        } else {
-            val source = ImageDecoder.createSource(contentResolver, uri)
-            ImageDecoder.decodeBitmap(source)
         }
+
     }
 }
 
