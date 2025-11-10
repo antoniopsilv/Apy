@@ -21,5 +21,9 @@ class HistoryRepository(application: Application) {
         executorService.execute { historyDao.insert(history) }
     }
 
+    fun delete() {
+        executorService.execute { historyDao.delete() }
+    }
+
     fun getHistory(): LiveData<List<History>> = historyDao.getHistory()
 }

@@ -16,7 +16,12 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         historyRepository.insert(history)
     }
 
+    fun deleteHistory() {
+        historyRepository.delete()
+    }
+
     fun getHistory(): LiveData<List<History>> = historyRepository.getHistory()
+
 }
 
 

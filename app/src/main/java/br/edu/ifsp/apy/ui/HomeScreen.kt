@@ -210,7 +210,25 @@ fun HomeScreen(navController: NavController) {
                             contentDescription = stringResource(id = R.string.salvar)
                         )
                     }
+
+                    IconButton(onClick = {
+                        historyViewModel.deleteHistory()
+                        navController.navigate("history_screen")
+                        Toast.makeText(
+                            context,
+                            "Histórico Apagado",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }) {
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.ic_delete),
+                            contentDescription = stringResource(id = R.string.delete)
+                        )
+                    }
                 }
+
+
+
             )
         }
     ) { innerPadding ->

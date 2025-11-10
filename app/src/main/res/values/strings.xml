@@ -2,4 +2,5 @@
     <string name="app_name">Apy</string>
     <string name="salvar">save</string>
     <string name="google_maps_key">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</string>
+    <string name="delete">delete</string>
 </resources>
