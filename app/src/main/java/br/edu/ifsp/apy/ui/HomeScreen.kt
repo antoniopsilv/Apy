@@ -221,14 +221,20 @@ fun HomeScreen(navController: NavController) {
                         ).show()
                     }) {
                         Icon(
-                            painter = painterResource(id = android.R.drawable.ic_delete),
+                            painter = painterResource(id = android.R.drawable.ic_notification_clear_all),
                             contentDescription = stringResource(id = R.string.delete)
                         )
                     }
+
+                    IconButton(onClick = {
+                        navController.navigate("history_screen")
+                         }) {
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.ic_menu_preferences),
+                            contentDescription = stringResource(id = R.string.config)
+                        )
+                    }
                 }
-
-
-
             )
         }
     ) { innerPadding ->
