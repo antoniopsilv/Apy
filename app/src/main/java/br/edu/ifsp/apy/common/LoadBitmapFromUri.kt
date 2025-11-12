@@ -14,7 +14,7 @@ fun loadBitmapFromUri(context: Context, uri: Uri, maxSize: Int = 1024): Bitmap {
         val inputStream = context.contentResolver.openInputStream(uri)
             ?: throw IllegalArgumentException("Não foi possível abrir o URI: $uri")
 
-        // Lê dimensões para redimensionar antes de carregar (economiza memória)
+        // Lê dimensões para redimensionar antes de carregar
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeStream(inputStream, null, options)
         inputStream.close()

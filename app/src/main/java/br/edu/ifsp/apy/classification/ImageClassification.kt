@@ -39,7 +39,7 @@ class ImageClassification(
         setupInterpreter()
     }
 
-    /** Inicializa o Interpreter com MappedByteBuffer e configurações otimizadas */
+    /** Inicializa o Interpreter com MappedByteBuffer */
     private fun setupInterpreter() {
         try {
             // 🔹 Carrega o modelo de forma eficiente
@@ -47,9 +47,7 @@ class ImageClassification(
 
             // 🔹 Configura opções do Interpreter
             val options = Interpreter.Options().apply {
-                setNumThreads(4) // use 4 threads (ajuste conforme o dispositivo)
-                // setUseNNAPI(true) // opcional: aceleração via NNAPI
-                // addDelegate(GpuDelegate()) // opcional: aceleração via GPU
+                setNumThreads(4) // uso 4 threads
             }
 
             interpreter = Interpreter(modelBuffer, options)

@@ -1,4 +1,5 @@
 package br.edu.ifsp.apy.ui
+import br.edu.ifsp.apy.R
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -6,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import br.edu.ifsp.apy.R
 import com.google.android.libraries.places.api.Places
 
 
@@ -33,6 +33,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("history_screen") {
                         HistoryScreen()
+                    }
+                    composable("settings_screen") {
+                        SettingsScreen(navController)
                     }
                 }
             }

@@ -60,7 +60,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
     fun setLoading(value: Boolean) {
         _isLoading.value = value
     }

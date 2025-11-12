@@ -1,10 +1,10 @@
 package br.edu.ifsp.apy.model.repository
 
-import android.app.Application
-import androidx.lifecycle.LiveData
 import br.edu.ifsp.apy.model.dao.HistoryDAO
 import br.edu.ifsp.apy.model.database.HistoryDatabase
 import br.edu.ifsp.apy.model.entity.History
+import android.app.Application
+import androidx.lifecycle.LiveData
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 

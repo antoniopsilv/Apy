@@ -1,5 +1,9 @@
 package br.edu.ifsp.apy.ui
 
+import br.edu.ifsp.apy.common.loadBitmapFromUri
+import br.edu.ifsp.apy.model.entity.History
+import br.edu.ifsp.apy.view.HistoryViewModel
+import br.edu.ifsp.apy.view.HistoryViewModelFactory
 import android.app.Application
 import android.content.Intent
 import android.graphics.Bitmap
@@ -39,10 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import br.edu.ifsp.apy.common.loadBitmapFromUri
-import br.edu.ifsp.apy.model.entity.History
-import br.edu.ifsp.apy.view.HistoryViewModel
-import br.edu.ifsp.apy.view.HistoryViewModelFactory
+
 
 @Composable
 fun HistoryScreen() {
@@ -91,6 +92,7 @@ fun HistoryItem(history: History) {
             e.printStackTrace()
         }
     }
+
 
     // Layout
     Row(

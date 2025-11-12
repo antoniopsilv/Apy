@@ -28,22 +28,29 @@
             </intent-filter>
         </activity>
 
+
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="br.edu.ifsp.apy.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
+
+            <!-- Meta-data do FileProvider -->
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+
+            <!-- Meta-data da chave da API do Google Maps -->
+            <meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="@string/google_maps_key" />
+
         </provider>
-
-        <!-- Meta-data do FileProvider -->
-        <meta-data
-            android:name="android.support.FILE_PROVIDER_PATHS"
-            android:resource="@xml/file_paths" />
-
-        <!-- Meta-data da chave da API do Google Maps -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
 
     </application>
 

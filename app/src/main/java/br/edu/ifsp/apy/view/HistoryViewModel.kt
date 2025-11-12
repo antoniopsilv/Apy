@@ -24,8 +24,6 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
 
 }
 
-
-
 class HistoryViewModelFactory(
     private val application: Application
 ) : ViewModelProvider.Factory {
