@@ -1,5 +1,6 @@
 package br.edu.ifsp.apy.ui
 
+import br.edu.ifsp.apy.model.repository.SettingsRepository
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
@@ -11,15 +12,12 @@ import androidx.navigation.NavController
 import br.edu.ifsp.apy.view.SettingsViewModel
 import android.app.Application
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.DoorBack
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import br.edu.ifsp.apy.common.ButtonCustom
-import br.edu.ifsp.apy.model.repository.SettingsRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch

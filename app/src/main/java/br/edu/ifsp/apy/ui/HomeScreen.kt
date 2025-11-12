@@ -248,7 +248,7 @@ fun HomeScreen(
     Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Apy") },
+                    title = { Text("Apy - Imagens de pele") },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color(0xFF673AB7),
                         titleContentColor = Color.White

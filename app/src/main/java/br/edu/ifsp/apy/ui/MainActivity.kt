@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
                         HomeScreen(navController)
                     }
                     composable("history_screen") {
-                        HistoryScreen()
+                        HistoryScreen(navController)
                     }
                     composable("settings_screen") {
                         SettingsScreen(navController)

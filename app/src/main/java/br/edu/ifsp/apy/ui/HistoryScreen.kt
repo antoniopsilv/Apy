@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -43,10 +44,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.navigation.NavController
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen() {
+fun HistoryScreen(navController: NavController) {
     val context = LocalContext.current.applicationContext as Application
     val owner = LocalViewModelStoreOwner.current
 
@@ -57,14 +62,31 @@ fun HistoryScreen() {
 
     val historyList by viewModel.getHistory().observeAsState(emptyList())
 
-
-    LazyColumn {
-        items(historyList) { history ->
-            HistoryItem(history)
+    // Scaffold com TopAppBar
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Histórico") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Voltar"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            contentPadding = paddingValues
+        ) {
+            items(historyList) { history ->
+                HistoryItem(history)
+            }
         }
     }
 }
-
 
 @Composable
 fun HistoryItem(history: History) {
