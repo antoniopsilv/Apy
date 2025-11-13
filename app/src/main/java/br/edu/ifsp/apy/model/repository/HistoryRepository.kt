@@ -10,19 +10,19 @@ import java.util.concurrent.Executors
 
 class HistoryRepository(application: Application) {
     private val historyDao: HistoryDAO
-    private val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+    //private val executorService: ExecutorService = Executors.newSingleThreadExecutor()
 
     init {
         val db = HistoryDatabase.getDatabase(application)
         historyDao = db.historyDao()
     }
 
-    fun insert(history: History) {
-        executorService.execute { historyDao.insert(history) }
+    suspend fun insert(history: History) {
+        historyDao.insert(history)
     }
 
-    fun delete() {
-        executorService.execute { historyDao.delete() }
+    suspend fun delete() {
+        historyDao.delete()
     }
 
     fun getHistory(): LiveData<List<History>> = historyDao.getHistory()
