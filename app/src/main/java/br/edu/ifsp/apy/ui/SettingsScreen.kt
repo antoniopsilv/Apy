@@ -77,7 +77,7 @@ fun SettingsScreen(navController: NavController) {
             ) {
                 Column {
                     Text(
-                        "Usar recorte de imagem (UCrop)",
+                        "Usar recorte de imagem",
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
