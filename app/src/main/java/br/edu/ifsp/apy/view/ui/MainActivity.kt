@@ -1,4 +1,4 @@
-package br.edu.ifsp.apy.ui
+package br.edu.ifsp.apy.view.ui
 import br.edu.ifsp.apy.R
 import android.os.Bundle
 import androidx.activity.ComponentActivity

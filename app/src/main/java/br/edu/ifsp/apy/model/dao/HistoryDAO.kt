@@ -2,7 +2,6 @@ package br.edu.ifsp.apy.model.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -12,10 +11,10 @@ import br.edu.ifsp.apy.model.entity.History
 interface HistoryDAO {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(history: History)
+    suspend fun insert(history: History)
 
     @Query("DELETE FROM history")
-    fun delete()
+    suspend fun delete()
 
     @Query("SELECT * FROM history ORDER BY id ASC")
     fun getHistory(): LiveData<List<History>>

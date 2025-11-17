@@ -1,4 +1,4 @@
-package br.edu.ifsp.apy.model.entity
+package br.edu.ifsp.apy.model.data
 
 data class PlacesResponse(
     val results: List<Place>

@@ -1,6 +1,6 @@
 @file:Suppress("OPT_IN_IS_NOT_ENABLED")
 
-package br.edu.ifsp.apy.ui
+package br.edu.ifsp.apy.view.ui
 
 import br.edu.ifsp.apy.classification.ImageClassification
 import br.edu.ifsp.apy.model.entity.History

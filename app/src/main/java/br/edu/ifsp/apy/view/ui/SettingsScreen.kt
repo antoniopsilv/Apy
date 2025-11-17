@@ -1,4 +1,4 @@
-package br.edu.ifsp.apy.ui
+package br.edu.ifsp.apy.view.ui
 
 import br.edu.ifsp.apy.model.repository.SettingsRepository
 import androidx.compose.foundation.layout.*

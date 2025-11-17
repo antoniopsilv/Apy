@@ -1,4 +1,4 @@
-package br.edu.ifsp.apy.data
+package br.edu.ifsp.apy.model.data
 
 data class DiseaseInfo(
     val title: String,

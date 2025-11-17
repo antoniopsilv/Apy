@@ -1,4 +1,4 @@
-package br.edu.ifsp.apy.data
+package br.edu.ifsp.apy.model.data
 
 import retrofit2.Response
 import retrofit2.http.GET
