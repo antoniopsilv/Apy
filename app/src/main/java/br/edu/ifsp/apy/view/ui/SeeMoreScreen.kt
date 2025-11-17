@@ -1,7 +1,7 @@
 package br.edu.ifsp.apy.ui
 
-import br.edu.ifsp.apy.data.DiseaseInfo
-import br.edu.ifsp.apy.data.DiseaseRepository
+import br.edu.ifsp.apy.model.data.DiseaseInfo
+import br.edu.ifsp.apy.model.data.DiseaseRepository
 import android.content.Context
 import androidx.appcompat.app.AlertDialog
 
