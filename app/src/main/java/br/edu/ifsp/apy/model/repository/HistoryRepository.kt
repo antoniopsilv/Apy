@@ -5,8 +5,6 @@ import br.edu.ifsp.apy.model.database.HistoryDatabase
 import br.edu.ifsp.apy.model.entity.History
 import android.app.Application
 import androidx.lifecycle.LiveData
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 class HistoryRepository(application: Application) {
     private val historyDao: HistoryDAO
