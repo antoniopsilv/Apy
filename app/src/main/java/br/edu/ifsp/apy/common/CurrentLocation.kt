@@ -19,8 +19,8 @@ suspend fun getCurrentLocation(context: Context): LatLng {
     return try {
         if (hasLocationPermission(context)) {
             val location = fusedLocationClient.lastLocation.await()
-            // Comentando para teste pois no emulador não pega coordenadas do local (Brasil).
-            // Testado no aparelho e funciona.
+//             Comentando para teste pois no emulador não pega coordenadas do local (Brasil).
+//             Testado no aparelho e funciona.
 //               if (location != null) {
 //                    LatLng(location.latitude, location.longitude)
 //               } else {

@@ -1,5 +1,6 @@
-package br.edu.ifsp.apy.model.data
+package br.edu.ifsp.apy.model.api
 
+import br.edu.ifsp.apy.model.domain.PlacesResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

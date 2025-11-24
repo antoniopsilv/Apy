@@ -3,7 +3,7 @@ package br.edu.ifsp.apy.view
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import br.edu.ifsp.apy.model.data.PlacesService
+import br.edu.ifsp.apy.model.api.PlacesService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
