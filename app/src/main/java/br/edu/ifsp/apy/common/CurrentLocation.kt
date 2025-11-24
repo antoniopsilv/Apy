@@ -19,12 +19,13 @@ suspend fun getCurrentLocation(context: Context): LatLng {
     return try {
         if (hasLocationPermission(context)) {
             val location = fusedLocationClient.lastLocation.await()
-            //         Avaliar a instrução acima que está retornando location dos USA.
-/*               if (location != null) {
-                    LatLng(location.latitude, location.longitude)
-               } else {*/
+            // Comentando para teste pois no emulador não pega coordenadas do local (Brasil).
+            // Testado no aparelho e funciona.
+//               if (location != null) {
+//                    LatLng(location.latitude, location.longitude)
+//               } else {
                    LatLng(-23.55052, -46.633308) // fallback
-/*                }*/
+//                }
         } else {
             // Permissão não concedida, fallback
             LatLng(-23.55052, -46.633308)

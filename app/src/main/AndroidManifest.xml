@@ -46,9 +46,9 @@
                 android:resource="@xml/file_paths" />
 
             <!-- Meta-data da chave da API do Google Maps -->
-            <meta-data
+<!--            <meta-data
                 android:name="com.google.android.geo.API_KEY"
-                android:value="@string/google_maps_key" />
+                android:value="@string/google_maps_key" />-->
         </provider>
 
     </application>

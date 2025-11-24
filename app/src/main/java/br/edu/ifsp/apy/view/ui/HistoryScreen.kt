@@ -3,7 +3,6 @@ package br.edu.ifsp.apy.view.ui
 import br.edu.ifsp.apy.common.loadBitmapFromUri
 import br.edu.ifsp.apy.model.entity.History
 import br.edu.ifsp.apy.view.HistoryViewModel
-import br.edu.ifsp.apy.view.HistoryViewModelFactory
 import android.app.Application
 import android.content.Intent
 import android.graphics.Bitmap
@@ -47,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import br.edu.ifsp.apy.view.ViewModelFactory
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,12 +55,12 @@ fun HistoryScreen(navController: NavController) {
     val context = LocalContext.current.applicationContext as Application
     val owner = LocalViewModelStoreOwner.current
 
-    val viewModel: HistoryViewModel = viewModel(
-        factory = HistoryViewModelFactory(context),
+    val historyViewModel: HistoryViewModel = viewModel(
+        factory = ViewModelFactory.getInstance(context.applicationContext as Application),
         viewModelStoreOwner = owner!!
     )
 
-    val historyList by viewModel.getHistory().observeAsState(emptyList())
+    val historyList by historyViewModel.getHistory().observeAsState(emptyList())
 
     // Scaffold com TopAppBar
     Scaffold(
