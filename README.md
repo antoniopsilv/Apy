@@ -23,4 +23,6 @@ Esse modelo classifica sete tipos de patologia:
 O nome “Apy” que em Tupi Guarani é semelhante a "Leitura ou inspeção interna", é o mais próximo em linguagem nativa que encontrei 
 para tentar comunicar "leitura de imagem interna" em um termo curto. 
 
-<img width="476" height="952" alt="image" src="https://github.com/user-attachments/assets/f732e40f-ac8b-4b62-81cb-70c246b0b138" />
+<img width="476" height="952" alt="image" src="https://github.com/user-attachments/assets/f732e40f-ac8b-4b62-81cb-70c246b0b138" />  
+<img width="482" height="937" alt="image" src="https://github.com/user-attachments/assets/cab2a3c0-72db-4fa3-8acf-d2be2f506af6" />
+
