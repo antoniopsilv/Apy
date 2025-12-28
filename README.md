@@ -11,14 +11,14 @@ para o treinamento (Keras) e converter para tflite e utilizá-lo no aplicativo.
 
 Esse modelo classifica sete tipos de patologia:
 
-Queratoses actínicas / Doença de Bowen
-Carcinoma basocelular
-Lesões benignas semelhantes à queratose
-Dermatofibroma (nódulo benigno)
-Melanoma (câncer de pele grave)
-Nevo (pinta ou sinal benigno)
-Nenhuma doença detectada
-Lesões vasculares
+1) Queratoses actínicas / Doença de Bowen
+2) Carcinoma basocelular
+3) Lesões benignas semelhantes à queratose
+4) Dermatofibroma (nódulo benigno)
+5) Melanoma (câncer de pele grave)
+6) Nevo (pinta ou sinal benigno)
+7) Nenhuma doença detectada
+8) Lesões vasculares
 
 O nome “Apy” que em Tupi Guarani é semelhante a "Leitura ou inspeção interna", é o mais próximo em linguagem nativa que encontrei 
 para tentar comunicar "leitura de imagem interna" em um termo curto. 
